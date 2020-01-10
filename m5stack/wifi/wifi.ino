@@ -4,19 +4,19 @@
 #include <M5Stack.h>
 #include "config.h"
 
-#define dataLength 5
+#define dataLength 5 //Longitud de los arrays que almacenan los datos
 
 WiFiClient wifiClient;
 PubSubClient client(wifiClient);
 
 int newData;
-
 int temperatureData[dataLength];
 int humidityData[dataLength];
 int luxData[dataLength];
+int soilData[dataLength];
 
+// Desplaza el array a la derecha e inserta el nuevo valor
 void addValue(int myArray[], int newValue, int arrayLength) {
-  //Desplaza el array hacia la derecha y añade el nuevo valor
   for(int i = arrayLength-1; i > 0; i--){
       myArray[i] = myArray[i-1];
     }
@@ -24,29 +24,32 @@ void addValue(int myArray[], int newValue, int arrayLength) {
 }
 
 void callback(char* topic, byte* payload, unsigned int length) {
+  // Guarda el nuevo dato en newData
   payload[length] = '\0';
   newData = atoi((char *)payload);
-  /*Serial.print("Topic: ");
-  Serial.print(topic);
-  Serial.print(" Dato: ");
-  Serial.println(newData);*/
+  // Guarda el topic en aTopic
   String aTopic = (char*)topic;
+  
   if (aTopic == topicTemperature) {
-    Serial.println("TEMPERATURA");
+    Serial.print("TEMPERATURA: ");
+    Serial.println(newData);
     addValue(temperatureData, newData, dataLength);
-    for(int i=0; i<dataLength; i++) {
-      Serial.print(temperatureData[i]);
-      Serial.print(", ");
-    }
-    Serial.println();
   }
   else if (aTopic == topicHumidity) {
-    Serial.println("HUMEDAD");
+    Serial.print("HUMEDAD: ");
+    Serial.println(newData);
+    addValue(humidityData, newData, dataLength);
   }
   else if (aTopic == topicLight) {
-    Serial.println("LUZ");
+    Serial.print("LUZ: ");
+    Serial.println(newData);
+    addValue(luxData, newData, dataLength);
   }
-  else Serial.println("OTRO");
+  else if (aTopic == topicSoil) {
+    Serial.print("SUELO: ");
+    Serial.println(newData);
+    addValue(soilData, newData, dataLength);
+  }
 }
 
 
