@@ -1,0 +1,10 @@
+const char * ssid = "";
+const char * password = "";
+const char * mqtt_server = "farmer.cloudmqtt.com";
+int mqtt_port = 11110;
+const char * mqtt_user = "";
+const char * mqtt_password = "";
+const char* topicTemperature = "planta/temperature";
+const char* topicHumidity = "planta/humidity";
+const char* topicLight = "planta/lux";
+const char* topicSoil = "planta/soil";
