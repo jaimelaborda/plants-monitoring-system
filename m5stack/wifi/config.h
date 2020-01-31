@@ -1,0 +1,10 @@
+const char * ssid = "AndroidAP";
+const char * password = "passwordxdd";
+const char * mqtt_server = "farmer.cloudmqtt.com";
+int mqtt_port = 11110;
+const char * mqtt_user = "gdeinbng";
+const char * mqtt_password = "KoTpnjfNZ6zk";
+const char* topicTemperature = "planta/temperature";
+const char* topicHumidity = "planta/humidity";
+const char* topicLight = "planta/lux";
+const char* topicSoil = "planta/soil";
