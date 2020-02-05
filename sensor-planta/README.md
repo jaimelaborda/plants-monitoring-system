@@ -1,1 +1,1 @@
-# planta-twittera-rev2
+# sensor-planta
