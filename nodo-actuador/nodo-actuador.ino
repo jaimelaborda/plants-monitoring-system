@@ -21,6 +21,8 @@ int value = 0;
 
 void setup() {
   pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
+  digitalWrite(BUILTIN_LED, HIGH);
+  
   pinMode(RELAY_PIN, OUTPUT);
   digitalWrite(RELAY_PIN, LOW);
 
@@ -42,8 +44,8 @@ void setup_wifi() {
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
+    toggleLed();
+    delay(100);
   }
 
   Serial.println("");
@@ -53,6 +55,8 @@ void setup_wifi() {
 }
 
 void callback(char* topic, byte* payload, unsigned int length) {
+  toggleLed();
+  
   Serial.print("Message arrived [");
   Serial.print(topic);
   Serial.print("] ");
@@ -91,6 +95,12 @@ void reconnect() {
   }
 }
 
+void toggleLed(){
+  digitalWrite(BUILTIN_LED, LOW);
+  delay(10);
+  digitalWrite(BUILTIN_LED, HIGH);
+}
+
 void loop() {
 
   if (!client.connected()) {
@@ -106,5 +116,6 @@ void loop() {
     client.publish(mqtt_topic_relay_heartbeat, "im alive!");
 
     Serial.println("im alive!");
+    toggleLed();
   }
 }

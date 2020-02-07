@@ -82,6 +82,7 @@ void setup_wifi() {
 
   while (WiFi.status() != WL_CONNECTED) {
     toggleLed();
+    delay(100);
   }
 
   Serial.println("");
@@ -125,7 +126,6 @@ void toggleLed(){
   digitalWrite(BUILTIN_LED, LOW);
   delay(10);
   digitalWrite(BUILTIN_LED, HIGH);
-  delay(10);
 }
 
 void loop() {
