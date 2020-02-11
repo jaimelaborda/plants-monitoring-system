@@ -55,31 +55,37 @@ void callback(char* topic, byte* payload, unsigned int length) {
     Serial.print("TEMPERATURA: ");
     Serial.println(newData);
     addValue(temperatureData, newData, dataLength);
-    if (currentSubMenu == 0) drawMenu(currentMenu);
+    if (currentMenu == 0 || (currentMenu == 1 && currentSubMenu == 0)) drawMenu(currentMenu);
   }
   else if (aTopic == topicHumidity) {
     Serial.print("HUMEDAD: ");
     Serial.println(newData);
     addValue(humidityData, newData, dataLength);
-    if (currentSubMenu == 1) drawMenu(currentMenu);
+    if (currentMenu == 0 || (currentMenu == 1 && currentSubMenu == 1)) drawMenu(currentMenu);
   }
   else if (aTopic == topicLight) {
     Serial.print("LUZ: ");
     Serial.println(newData);
     addValue(luxData, newData, dataLength);
-    if (currentSubMenu == 2) drawMenu(currentMenu);
+    if (currentMenu == 0 || (currentMenu == 1 && currentSubMenu == 2)) drawMenu(currentMenu);
   }
   else if (aTopic == topicSoil) {
     Serial.print("SUELO: ");
     Serial.println(newData);
     addValue(soilData, newData, dataLength);
-    if (currentSubMenu == 3) drawMenu(currentMenu);
+    if (currentMenu == 0 || (currentMenu == 1 && currentSubMenu == 3)) drawMenu(currentMenu);
+  }
+  else if (aTopic == topicRelayStatus) {
+    Serial.print("ACTIVACION: ");
+    Serial.println(newData);
+    if (newData == 0) irrigation = false;
+    else if (newData == 1) irrigation = true;
+    drawMenu(currentMenu);
   }
 }
 
 
-void setup()
-{
+void setup() {
     initArray(dataLength, temperatureData);
     initArray(dataLength, humidityData);
     initArray(dataLength, luxData);
@@ -113,6 +119,8 @@ void loop() {
         client.subscribe(topicHumidity);
         client.subscribe(topicLight);
         client.subscribe(topicSoil);
+        client.subscribe(topicRelay);
+        client.subscribe(topicRelayStatus);
       } else {
         delay(5000);
       }
@@ -141,12 +149,25 @@ void loop() {
   }
 
   else if (M5.BtnB.wasPressed() && currentMenu == 2) {
-    if (irrigation == false) irrigation = true;
-    else irrigation = false;
+    if (irrigation == false) startIrrigation(true);
+    else startIrrigation(false);
     drawMenu(currentMenu);
   }
   
   M5.update();
+}
+
+void startIrrigation (bool toDo) {
+  if (toDo == true) {
+    irrigation = true;
+    Serial.println(1);
+    client.publish(topicRelay,"1");
+  }
+  else {
+    irrigation = false;
+    Serial.println(0);
+    client.publish(topicRelay,"0");
+  }
 }
 
 void drawMenu (uint8_t menu) {
@@ -158,6 +179,7 @@ void drawMenu (uint8_t menu) {
   }
 }
 
+// Menu para los valores actuales
 void drawMenu0 (void) {
   M5.Lcd.clear(WHITE);
   M5.Lcd.setTextColor(BLACK);
@@ -184,17 +206,19 @@ void drawMenu0 (void) {
   M5.Lcd.print(soilData[0]);
 }
 
+// Menu para los graficos
 void drawMenu1 (void) {
   M5.Lcd.clear(WHITE);
   switch (currentSubMenu) {
-    case 0: Graph(dataLength,0,50,temperatureData, "TEMPERATURA"); break;
-    case 1: Graph(dataLength,0,50,humidityData, "HUMEDAD"); break;
-    case 2: Graph(dataLength,0,50,luxData, "LUZ"); break;
-    case 3: Graph(dataLength,0,50,soilData, "SUELO"); break;
+    case 0: Graph(dataLength,10,40,temperatureData, "TEMPERATURA"); break;
+    case 1: Graph(dataLength,0,100,humidityData, "HUMEDAD"); break;
+    case 2: Graph(dataLength,0,50000,luxData, "LUZ"); break;
+    case 3: Graph(dataLength,0,100,soilData, "SUELO"); break;
     default: Graph(dataLength,0,50,temperatureData, "TEMPERATURA"); break;
   }
 }
 
+// Menu para activar riego
 void drawMenu2 (void) {
   M5.Lcd.clear(WHITE);
   M5.Lcd.setTextColor(BLACK);
@@ -217,6 +241,7 @@ void drawMenu2 (void) {
   
 }
 
+// Función para generar gráficas
 void Graph (int xPoints, int yMin, int yMax, int graphData[], String title) {
   // xPoints: numero de datos a representar en el eje x
   // yMin: valor minimo del eje y
@@ -260,7 +285,15 @@ void Graph (int xPoints, int yMin, int yMax, int graphData[], String title) {
     M5.Lcd.drawLine(ox,oy+((y-oy)/10)*i,x,oy+((y-oy)/10)*i,MyGRAY);
     M5.Lcd.setCursor(ox-15,oy+((y-oy)/10)*i-5);
     int valor = ((yMax-yMin)/10)*(i);
-    M5.Lcd.print(valor);
+    if (title == "LUZ") {
+      M5.Lcd.setCursor(ox-20,oy+((y-oy)/10)*i-5);
+      valor = valor/1000;
+      M5.Lcd.print(valor);
+      M5.Lcd.print("k");
+    }
+    else {
+      M5.Lcd.print(valor);
+    }
   }
 
   // Dibujar los puntos
@@ -273,20 +306,7 @@ void Graph (int xPoints, int yMin, int yMax, int graphData[], String title) {
   }
 
   // Dibujar los conectores
-  /*for (int i = 2; i<=xPoints; i++) {
-    if (graphData[xPoints-i] != 255) {
-      // Punto inicial
-      int xCoord1 = map(xPoints-(i-1),0,xPoints-1,x,ox);
-      int yCoord1 = map(graphData[xPoints-(i-1)],yMin,yMax,oy,y);
-      // Punto final
-      int xCoord2 = map(xPoints-i,0,xPoints-1,x,ox);
-      int yCoord2 = map(graphData[xPoints-i],yMin,yMax,oy,y);
-      // Dibujar linea
-      M5.Lcd.drawLine(xCoord1,yCoord1,xCoord2,yCoord2,RED);
-    }
-  }*/
-
-  for (int i = 0; i<xPoints; i++) {
+  for (int i = 0; i<xPoints-1; i++) {
     if (graphData[i+1]!= -255) {
       // Punto inicial
       int xCoord1 = map(i,0,xPoints-1,x,ox);

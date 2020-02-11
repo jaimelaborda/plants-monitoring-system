@@ -7,4 +7,6 @@ const char * mqtt_password = "";
 const char* topicTemperature = "planta/temperature";
 const char* topicHumidity = "planta/humidity";
 const char* topicLight = "planta/lux";
-const char* topicSoil = "planta/soil";
+const char* topicSoil = "planta/soil_humidity";
+const char* topicRelay = "relay/activation";
+const char* topicRelayStatus = "relay/status";
