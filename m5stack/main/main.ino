@@ -96,6 +96,16 @@ void setup() {
     M5.Lcd.setBrightness(100);
     
     Serial.begin(115200);
+    
+    M5.Lcd.clear(WHITE);
+    M5.Lcd.setTextColor(BLACK);
+    
+    M5.Lcd.setTextSize(2);
+    M5.Lcd.setCursor(10,20);
+    M5.Lcd.print("Connecting to ");
+    M5.Lcd.print(ssid);
+    M5.Lcd.print("...");
+    
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
     if (WiFi.waitForConnectResult() != WL_CONNECTED) {
@@ -103,6 +113,10 @@ void setup() {
         while(1) {
             delay(1000);
         }
+    }else{
+      M5.Lcd.setCursor(10,60);
+      M5.Lcd.print("Connected!");
+      delay(1000);
     }
     client.setServer(mqtt_server,mqtt_port);
     client.setCallback(callback);
